@@ -43,7 +43,11 @@ class WebSocketManager {
           console.log(`Utilisateur authentifié avec l'ID : ${user.id}`);
 
           // Ajoute le joueur à une room
-          this.roomManager.addPlayerToRoom(socket.id, "room1");
+          this.roomManager.addPlayerToRoom(
+            socket.id,
+            user.username,
+            this.roomId,
+          );
         } catch (error) {
           socket.disconnect();
           console.log("Authentification échouée");
