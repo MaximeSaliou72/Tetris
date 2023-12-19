@@ -14,7 +14,8 @@ const Account = () => {
         accountInfo();
     }, []);
 
-    const accountInfo = async () => {
+    const accountInfo = async (e) => {
+        e.preventDefault();
         try {
             const response = await axios({
                 method: "GET",
