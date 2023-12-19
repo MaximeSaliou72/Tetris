@@ -73,7 +73,9 @@ const Account = () => {
                     <article>
                         <h3>Multi-Joueur</h3>
                         <button onClick={Random} className="custom-btn btn btn-black space">Aléatoire</button>
-                        <button className="custom-btn btn btn-black space">Room</button>
+                        <Link to="/Room">
+                            <button className="custom-btn btn btn-black space">Room</button>
+                        </Link>
                     </article>
                     <article>
                         <Link to="/logout">
