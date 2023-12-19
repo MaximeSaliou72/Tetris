@@ -21,9 +21,22 @@ app.use(async (ctx, next) => {
   try {
     await next();
   } catch (err) {
-    ctx.status = err.status || 500;
-    ctx.body = { message: err.message };
-    console.error("Erreur capturée: ", err.message);
+    if (err.name === "UnauthorizedError") {
+      ctx.status = 401;
+      ctx.body = {
+        message: "Erreur d'authentification",
+        detail: "Votre session a peut-être expiré ou le token est invalide.",
+        expiredAt: err.expiredAt ? err.expiredAt.toLocaleString() : "Inconnu",
+      };
+    } else {
+      ctx.status = err.status || 500;
+      ctx.body = {
+        message: err.message,
+        detail: err.detail || "Aucun détail supplémentaire disponible.",
+        stack: process.env.NODE_ENV === "development" ? err.stack : null,
+      };
+    }
+    console.error("Erreur capturée: ", err);
   }
 });
 

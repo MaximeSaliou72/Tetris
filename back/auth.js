@@ -92,7 +92,6 @@ router.get("/userinfo", async (ctx) => {
       [userId],
     );
     const user = userResult.rows[0];
-
     if (user) {
       ctx.body = {
         id: user.user_id,
