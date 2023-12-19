@@ -5,6 +5,7 @@ import TetrisView from "./views/TetrisView";
 import "./assets/css/globals.scss";
 import Account from "./views/Account";
 import Room from "./views/Room";
+import Logout from "./component/Logout";
 
 const App = () => {
   return (
@@ -30,6 +31,7 @@ const App = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/Account" element={<Account />} />
             <Route path="/room" element={<Room />} />
+            <Route path="/logout" element={<Logout />} />
             <Route path="/tetris" element={<TetrisView />} />
             <Route
               path="*"

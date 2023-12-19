@@ -14,8 +14,7 @@ const Account = () => {
         accountInfo();
     }, []);
 
-    const accountInfo = async (e) => {
-        e.preventDefault();
+    const accountInfo = async () => {
         try {
             const response = await axios({
                 method: "GET",
@@ -77,6 +76,11 @@ const Account = () => {
                             <button className="custom-btn btn btn-black space">Aléatoire</button>
                         </Link>
                         <button onClick={Random} className="custom-btn btn btn-black space">Room</button>
+                    </article>
+                    <article>
+                        <Link to="/logout">
+                            <button className="custom-btn btn btn-black">Deconnexion</button>
+                        </Link>
                     </article>
                 </div>
             </div>
