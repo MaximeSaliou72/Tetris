@@ -8,6 +8,7 @@ const Account = () => {
     RequireAuth();
     const token = getTokenFromLocalStorage();
     const [user, setUser] = useState([]);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         accountInfo();
