@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import RequireAuth from "../lib/auth";
 import { getTokenFromLocalStorage } from "../lib/common";
 import { useEffect, useState } from "react";
+import axios from "axios";
 
 const Account = () => {
     RequireAuth();

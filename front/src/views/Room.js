@@ -1,6 +1,7 @@
 // Room.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from "axios";
 
 const Room = () => {
     const [rooms, setRooms] = useState([]);
@@ -20,8 +21,8 @@ const Room = () => {
                     "Content-Type": "application/json",
                 },
             });
-            if (response.data) {
-                setUser(response.data);
+            if (response) {
+                setRooms(response);
             }
         } catch (err) {
             console.log(err);
