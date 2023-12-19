@@ -29,4 +29,52 @@ router.post("/create-room", async (ctx) => {
   ctx.body = { roomId };
 });
 
+// Route pour créer une room d'invitation
+router.post("/invite-to-room", async (ctx) => {
+  const { inviterId, inviteeId } = ctx.request.body;
+
+  // Vérifier si les identifiants des joueurs sont fournis
+  if (!inviterId || !inviteeId) {
+    ctx.status = 400;
+    ctx.body = {
+      error: "Les identifiants 'inviterId' et 'inviteeId' sont nécessaires.",
+    };
+    return;
+  }
+
+  try {
+    const roomId = roomManager.createInvitationRoom(inviterId, inviteeId);
+    ctx.body = { roomId };
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = { error: "Erreur lors de la création de la room d'invitation." };
+  }
+});
+
+// Route pour obtenir les détails d'une room spécifique
+router.get("/room/:roomId", async (ctx) => {
+  const { roomId } = ctx.params;
+  const roomDetails = roomManager.getRoomDetails(roomId);
+
+  if (roomDetails) {
+    ctx.body = roomDetails;
+  } else {
+    ctx.status = 404;
+    ctx.body = { error: "Room non trouvée" };
+  }
+});
+
+// Route pour obtenir les détails d'un joueur spécifique dans une room
+router.get("/room/:roomId/player/:playerId", async (ctx) => {
+  const { roomId, playerId } = ctx.params;
+  const playerDetails = roomManager.getPlayerDetails(roomId, playerId);
+
+  if (playerDetails) {
+    ctx.body = playerDetails;
+  } else {
+    ctx.status = 404;
+    ctx.body = { error: "Joueur non trouvé dans la room spécifiée" };
+  }
+});
+
 export default router;
