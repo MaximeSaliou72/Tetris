@@ -6,16 +6,17 @@ import fs from "fs";
 import { koaCors, socketIoCors } from "./middleware.js";
 import authRoutes from "./auth.js";
 import generalRoutes from "./routes.js";
-import setupWebSocket from "./websocket.js";
+import WebSocketManager from "./websocket/WebSocketManager.js"; // Assurez-vous que le chemin est correct
 
 // Chargement de la configuration à partir de config.json
 const rawConfig = fs.readFileSync(new URL("./config.json", import.meta.url));
 const config = JSON.parse(rawConfig);
-
 const app = new Koa();
 const server = http.createServer(app.callback());
 
-// Middleware pour gerer les erreurs de maniere global
+app.use(bodyParser());
+
+// Middleware pour gérer les erreurs de manière globale
 app.use(async (ctx, next) => {
   try {
     await next();
@@ -25,22 +26,23 @@ app.use(async (ctx, next) => {
     console.error("Erreur capturée: ", err.message);
   }
 });
+
 app.use(koaCors);
-app.use(bodyParser());
 app.use(
   koaJwt({ secret: config.jwt_secret }).unless({
     path: [/^\/public/, /^\/login/, /^\/signup/],
   }),
 );
+
 app.use(authRoutes.routes());
 app.use(generalRoutes.routes());
 
 // Export l'instance de l'application Koa
 export default app;
 
-// Importation dynamique de socket.io
+// Importation dynamique de socket.io et initialisation de WebSocketManager
 socketIoCors(server).then((socketIoInstance) => {
-  setupWebSocket(socketIoInstance);
+  WebSocketManager.initialize(socketIoInstance);
 
   const PORT = 8180;
   server.listen(PORT, () => {
