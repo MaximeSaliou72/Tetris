@@ -2,13 +2,21 @@ class RoomManager {
   constructor() {
     this.rooms = {};
     this.roomTimers = {};
+    this.roomIdCounter = 1;
+  }
+
+  // Crée une nouvelle room avec des joueurs spécifiques (pour les invitations)
+  createInvitationRoom(inviterId, inviteeId) {
+    const roomId = this.createRoom(false, [inviterId, inviteeId]);
+    this.rooms[roomId].isFull = true; // Marquer la room comme complète
+    return roomId;
   }
 
   // Crée une nouvelle room
-  createRoom(isRandom = true) {
-    const roomId = `room-${Object.keys(this.rooms).length + 1}`;
+  createRoom(isRandom = true, initialPlayers = []) {
+    const roomId = `room-${(this.roomIdCounter += 1)}`; // Génère un ID unique
     this.rooms[roomId] = {
-      players: [],
+      players: initialPlayers,
       isRandom,
       isFull: false,
     };
@@ -18,6 +26,38 @@ class RoomManager {
   // Vérifie si une room a de la place
   isRoomAvailable(roomId) {
     return this.rooms[roomId] && !this.rooms[roomId].isFull;
+  }
+
+  // Méthode pour obtenir les détails d'un joueur spécifique dans une room
+  getPlayerDetails(roomId, playerId) {
+    const room = this.rooms[roomId];
+    if (!room) {
+      return null; // Si la room n'existe pas, renvoyer null
+    }
+
+    const player = room.players.find((p) => p.id === playerId);
+    if (!player) {
+      return null; // Si le joueur n'est pas trouvé dans la room, renvoyer null
+    }
+
+    return player; // Renvoyer les détails du joueur
+  }
+
+  // Méthode pour obtenir les détails d'une room spécifique
+  getRoomDetails(roomId) {
+    const room = this.rooms[roomId];
+    if (!room) {
+      return null; // Si la room n'existe pas, renvoyer null
+    }
+
+    console.log("players:", room.players);
+
+    return {
+      roomId,
+      players: room.players, // S'assurer que 'players' contient les infos nécessaires
+      isFull: room.isFull,
+      isRandom: room.isRandom,
+    };
   }
 
   // Récupère la liste des rooms disponibles
@@ -36,11 +76,16 @@ class RoomManager {
   }
 
   // Ajoute un joueur à une room
-  addPlayerToRoom(playerId, roomId) {
-    if (!this.rooms[roomId]) {
-      this.rooms[roomId] = [];
+  addPlayerToRoom(playerId, username, roomId) {
+    const room = this.rooms[roomId];
+    if (!room || room.players.length >= 2 || !room.isRandom) {
+      return false;
     }
-    this.rooms[roomId].push(playerId);
+    room.players.push({ id: playerId, username }); // Stocker un objet avec l'ID et le nom d'utilisateur
+    if (room.players.length === 2) {
+      room.isFull = true;
+    }
+    return true;
   }
 
   // Trouve l'adversaire d'un joueur

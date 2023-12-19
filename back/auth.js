@@ -95,6 +95,7 @@ router.get("/userinfo", async (ctx) => {
 
     if (user) {
       ctx.body = {
+        id: user.user_id,
         username: user.user_name,
         email: user.user_email,
         password: user.hashed_password,
