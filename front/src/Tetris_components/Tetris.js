@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import io from "socket.io-client";
 import { createStage, checkCollision } from "../gamehelper";
 
 // Styled Components
@@ -22,11 +22,34 @@ const Tetris = () => {
 
   const [player, updatePlayerPos, resetPlayer, playerRotate] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
-  const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(
-    rowsCleared
-  );
+  const [score, setScore, rows, setRows, level, setLevel] =
+    useGameStatus(rowsCleared);
 
-  console.log("re-render");
+  // Établir la connexion WebSocket
+  useEffect(() => {
+    const socket = io("http://localhost:8180");
+
+    socket.on("connect", () => {
+      console.log("Connecté au serveur WebSocket");
+    });
+
+    socket.on("message", (message) => {
+      console.log("Message reçu du serveur:", message);
+      // Traiter le message ici
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Déconnecté du serveur WebSocket");
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("Erreur de connexion WebSocket:", error);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   const movePlayer = (dir) => {
     if (!checkCollision(player, stage, { x: dir, y: 0 })) {
@@ -69,14 +92,12 @@ const Tetris = () => {
   const keyUp = ({ keyCode }) => {
     if (!gameOver) {
       if (keyCode === 40) {
-        console.log("interval on");
         setDropTime(1000 / (level + 1) + 200);
       }
     }
   };
 
   const dropPlayer = () => {
-    console.log("interval off");
     setDropTime(null);
     drop();
   };
