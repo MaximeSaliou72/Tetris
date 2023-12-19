@@ -3,7 +3,7 @@ import http from "http";
 import bodyParser from "koa-bodyparser";
 import koaJwt from "koa-jwt";
 import fs from "fs";
-import corsMiddleware from "./middleware.js";
+import { koaCors, socketIoCors } from "./middleware.js";
 import authRoutes from "./auth.js";
 import generalRoutes from "./routes.js";
 import setupWebSocket from "./websocket.js";
@@ -25,7 +25,7 @@ app.use(async (ctx, next) => {
     console.error("Erreur capturée: ", err.message);
   }
 });
-app.use(corsMiddleware);
+app.use(koaCors);
 app.use(bodyParser());
 app.use(
   koaJwt({ secret: config.jwt_secret }).unless({
@@ -39,11 +39,8 @@ app.use(generalRoutes.routes());
 export default app;
 
 // Importation dynamique de socket.io
-import("socket.io").then((socketIoModule) => {
-  // Création de l'instance socket.io en utilisant .attach()
-  const io = new socketIoModule.Server();
-  io.attach(server);
-  setupWebSocket(io);
+socketIoCors(server).then((socketIoInstance) => {
+  setupWebSocket(socketIoInstance);
 
   const PORT = 8180;
   server.listen(PORT, () => {
