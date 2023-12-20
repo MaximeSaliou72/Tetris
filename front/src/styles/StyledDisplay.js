@@ -5,7 +5,7 @@ export const StyledDisplay = styled.div`
   align-items: center;
   margin: 0 0 20px 0;
   min-height: 30px;
-  width: 100%;
+  width: fit-content;
   color: ${(props) => (props.gameOver ? "red" : "black")};
   font-size: 3rem;
   font-weight: bold;

@@ -15,6 +15,7 @@ export const StyledTetris = styled.div`
   height: 100vh;
   padding: 40px;
   margin: 0 auto;
+  gap: 10rem;
 
   aside {
     display: flex;

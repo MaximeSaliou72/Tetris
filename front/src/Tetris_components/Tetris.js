@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import { createStage, checkCollision } from "../gamehelper";
+import EmojiButton from "../component/EmojiButton";
 
 // Styled Components
 import { StyledTetrisWrapper, StyledTetris } from "../styles/StyledTetris";
@@ -17,17 +18,21 @@ import Display from "./Display";
 import StartButton from "./StartButton";
 
 const Tetris = () => {
+  const [socket, setSocket] = useState(null);
+
   const [dropTime, setDropTime] = useState(null);
   const [gameOver, setGameOver] = useState(false);
 
   const [player, updatePlayerPos, resetPlayer, playerRotate] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
+  const [clicked, setClicked] = useState(false);
   const [score, setScore, rows, setRows, level, setLevel] =
     useGameStatus(rowsCleared);
 
   // Établir la connexion WebSocket
   useEffect(() => {
     const socket = io("http://localhost:8180");
+    setSocket(socket);
 
     socket.on("connect", () => {
       console.log("Connecté au serveur WebSocket");
@@ -36,6 +41,14 @@ const Tetris = () => {
     socket.on("message", (message) => {
       console.log("Message reçu du serveur:", message);
       // Traiter le message ici
+    });
+
+    socket.on("gameData", (data) => {
+      console.log("GameData received:", data);
+    });
+
+    socket.on("emote", (data) => {
+      console.log("Emote received:", data);
     });
 
     socket.on("disconnect", () => {
@@ -50,6 +63,27 @@ const Tetris = () => {
       socket.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    if (socket) {
+      const gameData = {
+        level: level,
+        rows: rows,
+        score: score,
+        username: "username",
+      };
+
+      socket.emit("gameData", gameData);
+      console.log(gameData);
+    }
+  }, [socket, level, rows, score]);
+
+  const handleEmojiClick = (text) => {
+    if (socket) {
+      socket.emit("emote", text);
+      console.log(text);
+    }
+  };
 
   const movePlayer = (dir) => {
     if (!checkCollision(player, stage, { x: dir, y: 0 })) {
@@ -66,6 +100,7 @@ const Tetris = () => {
     setScore(0);
     setRows(0);
     setLevel(0);
+    setClicked(true);
   };
 
   const drop = () => {
@@ -81,9 +116,9 @@ const Tetris = () => {
     } else {
       // Game Over
       if (player.pos.y < 1) {
-        console.log("GAME OVER!!!");
         setGameOver(true);
         setDropTime(null);
+        setClicked(false);
       }
       updatePlayerPos({ x: 0, y: 0, collided: true });
     }
@@ -91,7 +126,7 @@ const Tetris = () => {
 
   const keyUp = ({ keyCode }) => {
     if (!gameOver) {
-      if (keyCode === 40) {
+      if (keyCode === 40 || keyCode === 83) {
         setDropTime(1000 / (level + 1) + 200);
       }
     }
@@ -104,13 +139,13 @@ const Tetris = () => {
 
   const move = ({ keyCode }) => {
     if (!gameOver) {
-      if (keyCode === 37) {
+      if (keyCode === 37 || keyCode === 81) {
         movePlayer(-1);
-      } else if (keyCode === 39) {
+      } else if (keyCode === 39 || keyCode === 68) {
         movePlayer(1);
-      } else if (keyCode === 40) {
+      } else if (keyCode === 40 || keyCode === 83) {
         dropPlayer();
-      } else if (keyCode === 38) {
+      } else if (keyCode === 38 || keyCode === 90) {
         playerRotate(stage, 1);
       }
     }
@@ -133,13 +168,14 @@ const Tetris = () => {
           {gameOver ? (
             <Display gameOver={gameOver} text="Game Over" />
           ) : (
-            <div>
+            <div className="score-board">
               <Display text={`Score ${score}`} />
               <Display text={`Rows ${rows}`} />
               <Display text={`Level ${level}`} />
+              <EmojiButton onEmojiClick={handleEmojiClick} />
             </div>
           )}
-          <StartButton callback={startGame} />
+          <StartButton callback={startGame} clicked={clicked} />
         </aside>
       </StyledTetris>
     </StyledTetrisWrapper>
