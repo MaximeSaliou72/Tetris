@@ -3,47 +3,59 @@ import http from "http";
 import bodyParser from "koa-bodyparser";
 import koaJwt from "koa-jwt";
 import fs from "fs";
-import corsMiddleware from "./middleware.js";
+import { koaCors, socketIoCors } from "./middleware.js";
 import authRoutes from "./auth.js";
 import generalRoutes from "./routes.js";
-import setupWebSocket from "./websocket.js";
+import WebSocketManager from "./websocket/WebSocketManager.js"; // Assurez-vous que le chemin est correct
 
 // Chargement de la configuration à partir de config.json
 const rawConfig = fs.readFileSync(new URL("./config.json", import.meta.url));
 const config = JSON.parse(rawConfig);
-
 const app = new Koa();
 const server = http.createServer(app.callback());
 
-// Middleware pour gerer les erreurs de maniere global
+app.use(bodyParser());
+
+// Middleware pour gérer les erreurs de manière globale
 app.use(async (ctx, next) => {
   try {
     await next();
   } catch (err) {
-    ctx.status = err.status || 500;
-    ctx.body = { message: err.message };
-    console.error("Erreur capturée: ", err.message);
+    if (err.name === "UnauthorizedError") {
+      ctx.status = 401;
+      ctx.body = {
+        message: "Erreur d'authentification",
+        detail: "Votre session a peut-être expiré ou le token est invalide.",
+        expiredAt: err.expiredAt ? err.expiredAt.toLocaleString() : "Inconnu",
+      };
+    } else {
+      ctx.status = err.status || 500;
+      ctx.body = {
+        message: err.message,
+        detail: err.detail || "Aucun détail supplémentaire disponible.",
+        stack: process.env.NODE_ENV === "development" ? err.stack : null,
+      };
+    }
+    console.error("Erreur capturée: ", err);
   }
 });
-app.use(corsMiddleware);
-app.use(bodyParser());
+
+app.use(koaCors);
 app.use(
   koaJwt({ secret: config.jwt_secret }).unless({
     path: [/^\/public/, /^\/login/, /^\/signup/],
   }),
 );
+
 app.use(authRoutes.routes());
 app.use(generalRoutes.routes());
 
 // Export l'instance de l'application Koa
 export default app;
 
-// Importation dynamique de socket.io
-import("socket.io").then((socketIoModule) => {
-  // Création de l'instance socket.io en utilisant .attach()
-  const io = new socketIoModule.Server();
-  io.attach(server);
-  setupWebSocket(io);
+// Importation dynamique de socket.io et initialisation de WebSocketManager
+socketIoCors(server).then((socketIoInstance) => {
+  WebSocketManager.initialize(socketIoInstance);
 
   const PORT = 8180;
   server.listen(PORT, () => {

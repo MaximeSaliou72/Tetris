@@ -238,11 +238,10 @@ section.account {
       padding: 1em 1em;
       flex-direction: column;
 
-      div {
-        button {
-          margin: 0 1em;
-        }
+      .space {
+        margin: 0 1em;
       }
+
     }
   }
 }

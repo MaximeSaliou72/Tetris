@@ -1,33 +1,80 @@
 // Importations ES module
 import Router from "koa-router";
-// import * as db from "./database";
+import RoomManager from "./websocket/RoomManager.js";
 
 const router = new Router();
+const roomManager = new RoomManager();
 
 // Route d'accueil
 router.get("/", async (ctx) => {
   ctx.body = "Bienvenue sur Tetris Online!";
 });
 
-// // Route pour obtenir des informations sur le jeu ou le statut du serveur
-// router.get('/status', async (ctx) => {
-//     ctx.body = { status: 'Le serveur fonctionne correctement' };
-// });
+// Route pour récupéer la liste des rooms
+router.get("/rooms", async (ctx) => {
+  const availableRooms = roomManager.getAvailableRooms();
+  ctx.body = { availableRooms };
+});
 
-// // Route pour récupérer le score d'un utilisateur
-// router.get('/score/:userId', async (ctx) => {
-//     const userId = ctx.params.userId;
-//     const score = await db.getUserScore(userId);
-//     ctx.body = { userId, score };
-// });
+// Route pour récupérer le statut des rooms
+router.get("/room-status", async (ctx) => {
+  const roomStatus = roomManager.getRoomStatus();
+  ctx.body = { roomStatus };
+});
 
-// // Route pour mettre à jour le score d'un utilisateur
-// router.post('/score/update', async (ctx) => {
-//     const { userId, score } = ctx.request.body;
-//     await db.updateUserScore(userId, score);
-//     ctx.body = { message: 'Score mis à jour' };
-// });
+// Route pour créer une room
+router.post("/create-room", async (ctx) => {
+  const isRandom = ctx.request.body.isRandom || true;
+  const roomId = roomManager.createRoom(isRandom);
+  ctx.body = { roomId };
+});
 
-// Ajoutez d'autres routes selon les besoins de votre jeu
+// Route pour créer une room d'invitation
+router.post("/invite-to-room", async (ctx) => {
+  const { inviterId, inviteeId } = ctx.request.body;
+
+  // Vérifier si les identifiants des joueurs sont fournis
+  if (!inviterId || !inviteeId) {
+    ctx.status = 400;
+    ctx.body = {
+      error: "Les identifiants 'inviterId' et 'inviteeId' sont nécessaires.",
+    };
+    return;
+  }
+
+  try {
+    const roomId = roomManager.createInvitationRoom(inviterId, inviteeId);
+    ctx.body = { roomId };
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = { error: "Erreur lors de la création de la room d'invitation." };
+  }
+});
+
+// Route pour obtenir les détails d'une room spécifique
+router.get("/room/:roomId", async (ctx) => {
+  const { roomId } = ctx.params;
+  const roomDetails = roomManager.getRoomDetails(roomId);
+
+  if (roomDetails) {
+    ctx.body = roomDetails;
+  } else {
+    ctx.status = 404;
+    ctx.body = { error: "Room non trouvée" };
+  }
+});
+
+// Route pour obtenir les détails d'un joueur spécifique dans une room
+router.get("/room/:roomId/player/:playerId", async (ctx) => {
+  const { roomId, playerId } = ctx.params;
+  const playerDetails = roomManager.getPlayerDetails(roomId, playerId);
+
+  if (playerDetails) {
+    ctx.body = playerDetails;
+  } else {
+    ctx.status = 404;
+    ctx.body = { error: "Joueur non trouvé dans la room spécifiée" };
+  }
+});
 
 export default router;

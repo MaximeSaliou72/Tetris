@@ -42,7 +42,8 @@ router.post("/signup", async (ctx) => {
     return;
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const saltRounds = 10;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
 
   try {
     await pool.query(
@@ -91,9 +92,9 @@ router.get("/userinfo", async (ctx) => {
       [userId],
     );
     const user = userResult.rows[0];
-
     if (user) {
       ctx.body = {
+        id: user.user_id,
         username: user.user_name,
         email: user.user_email,
         password: user.hashed_password,

@@ -10,8 +10,7 @@
     "dev-front": "cd ./front && npm start",
     "dev": "concurrently \"npm run dev-*\"",
     "prepare": "husky install",
-    "lint": "lint-staged",
-    "pre-push-script": "git diff --name-only --cached | grep '^back/' && npm test || echo 'No back/ files changed, skipping tests'"
+    "lint": "lint-staged"
   },
   "keywords": [
     "game",
@@ -26,11 +25,6 @@
     "husky": "^8.0.3",
     "lint-staged": "^15.1.0",
     "prettier": "^3.1.0"
-  },
-  "husky": {
-    "hooks": {
-      "pre-push": "sh .husky/pre-push"
-    }
   },
   "dependencies": {
     "dot-env": "^0.0.1",
