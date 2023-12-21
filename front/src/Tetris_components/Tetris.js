@@ -25,12 +25,18 @@ const Tetris = () => {
   const { tokenRoom } = location.state  || {};
   const [dropTime, setDropTime] = useState(null);
   const [gameOver, setGameOver] = useState(false);
+  const navigate = useNavigate();
 
   const [player, updatePlayerPos, resetPlayer, playerRotate] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
   const [clicked, setClicked] = useState(false);
   const [score, setScore, rows, setRows, level, setLevel] =
     useGameStatus(rowsCleared);
+
+
+    const  goHome = () => {
+      navigate("/Account");
+    }
 
   // Établir la connexion WebSocket
   useEffect(() => {
@@ -203,7 +209,9 @@ const Tetris = () => {
               <EmojiButton onEmojiClick={handleEmojiClick} />
             </div>
           )}
-          <StartButton callback={startGame} clicked={clicked} />
+          <StartButton callback={startGame} clicked={clicked} />*
+          <button className="custom-btn btn btn-black marg" onClick={goHome}>Retour</button>
+          
           {tokenRoom ?
            <p>
            Voici le token à envoyer à l'autre joueur:

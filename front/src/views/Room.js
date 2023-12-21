@@ -11,6 +11,11 @@ const Room = () => {
   const [newRoomName, setNewRoomName] = useState("");
   const navigate = useNavigate();
 
+  
+  const handleGoBack = () => {
+    navigate(-1);
+  }
+
   const createRoom = async () => {
     try {
       const response = await axios({
@@ -64,12 +69,13 @@ const Room = () => {
           value={newRoomName}
           onChange={(e) => setNewRoomName(e.target.value)}
         />
-        <button onClick={joinRoom}>Rejoindre Room</button>
+        <button className="custom-btn btn btn-black marg" onClick={joinRoom}>Rejoindre Room</button>
       </div>
       <h2>Créer une nouvelle Room</h2>
       <div>
-        <button onClick={createRoom}>Créer Room</button>
+        <button className="custom-btn btn btn-black" onClick={createRoom}>Créer Room</button>
       </div>
+      <button className="custom-btn btn btn-black marg" onClick={handleGoBack}>Retour</button>
     </div>
   );
 };
