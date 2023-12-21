@@ -56,6 +56,10 @@ const Account = () => {
     }
   };
 
+  const Room = () => {
+    navigate("/Room", { state: { id: user.id } });
+  }
+
   return (
     <section className="account">
       <h2>Votre compte</h2>
@@ -78,9 +82,7 @@ const Account = () => {
             <button onClick={Random} className="custom-btn btn btn-black space">
               Aléatoire
             </button>
-            <Link to="/Room">
-              <button className="custom-btn btn btn-black space">Room</button>
-            </Link>
+              <button onClick={Room} className="custom-btn btn btn-black space">Room</button>
           </article>
           <article>
             <Link to="/logout">

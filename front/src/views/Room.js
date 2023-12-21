@@ -1,67 +1,55 @@
 // Room.js
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import axios from "axios";
+import { getTokenFromLocalStorage } from "../lib/common";
 
 const Room = () => {
     const [rooms, setRooms] = useState([]);
-
+    const token = getTokenFromLocalStorage();
+    const location = useLocation();
+    const { id } = location.state;
     const [newRoomName, setNewRoomName] = useState('');
 
-    useEffect(() => {
-        fetchRooms();
-    }, []);
-
-    const fetchRooms = async () => {
+    const createRoom = async () => {
         try {
             const response = await axios({
-                method: "GET",
-                url: "http://localhost:8180/rooms",
+                method: "POST",
+                url: "http://localhost:8180/create-room",
+                data: {
+                    id: id
+                },
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+
                 },
             });
             if (response) {
+                console.log(response)
                 setRooms(response);
             }
         } catch (err) {
             console.log(err);
         }
     };
-    const createRoom = () => {
-        const newRoom = {
-            id: rooms.length + 1,
-            name: newRoomName,
-        };
+    const joinRoom = () => {
 
-        setRooms([...rooms, newRoom]);
-
-        setNewRoomName('');
-    };
+    }
 
     return (
         <div>
-            {rooms.length > 0 ?
-                <h2>Liste des Rooms disponibles</h2>
-                :
-                null
-            }
-            <ul>
-                {rooms.map((room) => (
-                    <li key={room.id}>
-                        <Link to={`/room/${room.id}`}>{room.name}</Link>
-                    </li>
-                ))}
-            </ul>
-
-            <h2>Créer une nouvelle Room</h2>
+            <h2>Rejoindre une Room</h2>
             <div>
-                <label>Nom de la Room:</label>
                 <input
                     type="text"
                     value={newRoomName}
                     onChange={(e) => setNewRoomName(e.target.value)}
                 />
+                <button onClick={joinRoom}>Rejoindre Room</button>
+            </div>
+            <h2>Créer une nouvelle Room</h2>
+            <div>
                 <button onClick={createRoom}>Créer Room</button>
             </div>
         </div>
