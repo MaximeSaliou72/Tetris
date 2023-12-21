@@ -178,9 +178,9 @@ class RoomManager {
   }
 
   // Méthode pour trouver l'ID de la room par ID du joueur
-  findRoomIdByPlayerId(playerId) {
-    return Object.keys(this.rooms).find((roomId) =>
-      this.rooms[roomId].players.includes(playerId),
+  findRoomIdByToken(token) {
+    return Object.keys(this.rooms).find(
+      (roomId) => this.rooms[roomId].token === token,
     );
   }
 }

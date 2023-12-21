@@ -27,6 +27,22 @@ router.get(
   },
 );
 
+router.get(
+  "/join-room/:token",
+  AuthController.tokenRenewalMiddleware,
+  async (ctx) => {
+    const { token } = ctx.params;
+    const roomId = roomManager.findRoomIdByToken(token);
+    if (!roomId) {
+      ctx.status = 404;
+      ctx.body = { error: "Room non trouvée avec ce token" };
+      return;
+    }
+    const roomDetails = roomManager.getRoomDetails(roomId);
+    ctx.body = roomDetails;
+  },
+);
+
 // Route pour créer une room
 router.post(
   "/create-room",
