@@ -1,7 +1,11 @@
 import React from "react";
 
-const StartButton = ({ callback }) => (
-  <button onClick={callback} className="custom-btn btn btn-black">
+const StartButton = ({ callback, clicked }) => (
+  <button
+    onClick={callback}
+    disabled={clicked}
+    className="custom-btn btn btn-black"
+  >
     Start Game
   </button>
 );
