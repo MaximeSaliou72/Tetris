@@ -32,9 +32,21 @@ router.post(
   "/create-room",
   AuthController.tokenRenewalMiddleware,
   async (ctx) => {
-    const isRandom = ctx.request.body.isRandom || true;
-    const roomId = roomManager.createRoom(isRandom);
-    ctx.body = { roomId };
+    try {
+      const isRandom =
+        typeof ctx.request.body.isRandom === "boolean"
+          ? ctx.request.body.isRandom
+          : true;
+      const roomId = roomManager.createRoom(isRandom);
+      const roomDetails = roomManager.getRoomDetails(roomId); // Renvoyer plus de détails
+
+      ctx.status = 200;
+      ctx.body = { roomId, ...roomDetails }; // Renvoie roomId et d'autres détails
+    } catch (error) {
+      console.error(`Erreur lors de la création de la room: ${error}`);
+      ctx.status = 500;
+      ctx.body = { error: "Erreur lors de la création de la room." };
+    }
   },
 );
 
