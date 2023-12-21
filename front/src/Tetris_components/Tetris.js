@@ -206,7 +206,7 @@ const Tetris = () => {
           <StartButton callback={startGame} clicked={clicked} />
           {tokenRoom ?
            <p>
-           Voici le token à envoyer à l'autre joueur: {' '}
+           Voici le token à envoyer à l'autre joueur:
            <span className="tokenRoom">
              {tokenRoom}
            </span>
