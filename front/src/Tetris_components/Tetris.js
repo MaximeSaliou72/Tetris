@@ -3,6 +3,7 @@ import io from "socket.io-client";
 import { createStage, checkCollision } from "../gamehelper";
 import EmojiButton from "../component/EmojiButton";
 import { getTokenFromLocalStorage } from "../lib/common";
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // Styled Components
 import { StyledTetrisWrapper, StyledTetris } from "../styles/StyledTetris";
@@ -20,7 +21,8 @@ import StartButton from "./StartButton";
 
 const Tetris = () => {
   const [socket, setSocket] = useState(null);
-
+  const location = useLocation();
+  const { tokenRoom } = location.state  || {};
   const [dropTime, setDropTime] = useState(null);
   const [gameOver, setGameOver] = useState(false);
 
@@ -202,6 +204,14 @@ const Tetris = () => {
             </div>
           )}
           <StartButton callback={startGame} clicked={clicked} />
+          {tokenRoom ?
+           <p>
+           Voici le token à envoyer à l'autre joueur: {' '}
+           <span className="tokenRoom">
+             {tokenRoom}
+           </span>
+         </p>
+            : null}
         </aside>
       </StyledTetris>
     </StyledTetrisWrapper>

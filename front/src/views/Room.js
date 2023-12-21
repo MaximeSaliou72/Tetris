@@ -1,15 +1,15 @@
 // Room.js
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { getTokenFromLocalStorage } from "../lib/common";
 
 const Room = () => {
-    const [rooms, setRooms] = useState([]);
     const token = getTokenFromLocalStorage();
     const location = useLocation();
     const { id } = location.state;
     const [newRoomName, setNewRoomName] = useState('');
+    const navigate = useNavigate();
 
     const createRoom = async () => {
         try {
@@ -26,8 +26,8 @@ const Room = () => {
                 },
             });
             if (response) {
-                console.log(response)
-                setRooms(response);
+                navigate("/Tetris", { state: { tokenRoom: response.data.token } });
+
             }
         } catch (err) {
             console.log(err);
