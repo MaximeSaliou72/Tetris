@@ -49,6 +49,8 @@ const Account = () => {
       });
       if (response) {
         console.log(response);
+        const roomToken = response.data.token; // Récupéreration du token de la room crée
+        console.log("Token de la Room:", roomToken);
         navigate("/tetris");
       }
     } catch (err) {
@@ -58,7 +60,7 @@ const Account = () => {
 
   const Room = () => {
     navigate("/Room", { state: { id: user.id } });
-  }
+  };
 
   return (
     <section className="account">
@@ -82,7 +84,9 @@ const Account = () => {
             <button onClick={Random} className="custom-btn btn btn-black space">
               Aléatoire
             </button>
-              <button onClick={Room} className="custom-btn btn btn-black space">Room</button>
+            <button onClick={Room} className="custom-btn btn btn-black space">
+              Room
+            </button>
           </article>
           <article>
             <Link to="/logout">

@@ -79,9 +79,10 @@ class RoomManager {
 
     return {
       roomId,
-      players: room.players, // S'assurer que 'players' contient les infos nécessaires
+      players: room.players,
       isFull: room.isFull,
       isRandom: room.isRandom,
+      token: room.token,
     };
   }
 
