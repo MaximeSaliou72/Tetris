@@ -39,9 +39,10 @@ router.post(
           : true;
       const roomId = roomManager.createRoom(isRandom);
       const roomDetails = roomManager.getRoomDetails(roomId); // Renvoyer plus de détails
-
+      const roomToken = roomDetails.token; // Récupérer le token de la room
+      console.log(roomToken);
       ctx.status = 200;
-      ctx.body = { roomId, ...roomDetails }; // Renvoie roomId et d'autres détails
+      ctx.body = { roomId, ...roomDetails, token: roomToken }; // Renvoie roomId, roomDetails et le token
     } catch (error) {
       console.error(`Erreur lors de la création de la room: ${error}`);
       ctx.status = 500;
