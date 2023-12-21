@@ -1,8 +1,9 @@
 class RoomManager {
-  constructor() {
+  constructor(userMap) {
     this.rooms = {};
     this.roomTimers = {};
     this.roomIdCounter = 1;
+    this.userMap = userMap;
   }
 
   // Crée une nouvelle room avec des joueurs spécifiques (pour les invitations)
@@ -12,14 +13,38 @@ class RoomManager {
     return roomId;
   }
 
+  // Méthode pour générer un token unique de 5 caractères
+  static generateToken() {
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let token = "";
+    for (let i = 0; i < 5; i += 1) {
+      token += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return token;
+  }
+
   // Crée une nouvelle room
   createRoom(isRandom = true, initialPlayers = []) {
-    const roomId = `room-${(this.roomIdCounter += 1)}`; // Génère un ID unique
+    const roomId = `room-${(this.roomIdCounter += 1)}`;
     this.rooms[roomId] = {
       players: initialPlayers,
       isRandom,
       isFull: false,
+      token: RoomManager.generateToken(),
     };
+
+    // Récupérer les usernames des joueurs à partir de la userMap
+    const playerUsernames = initialPlayers
+      .map((playerId) => {
+        const user = this.userMap.get(playerId);
+        return user ? user.username : "Inconnu";
+      })
+      .join(", ");
+
+    console.log(
+      `[createRoom] Room créée: ${roomId} avec les joueurs ${playerUsernames}`,
+    );
     return roomId;
   }
 
@@ -63,8 +88,14 @@ class RoomManager {
   // Récupère la liste des rooms disponibles
   getAvailableRooms() {
     return Object.entries(this.rooms)
-      .filter(([room]) => !room.isFull && room.isRandom)
-      .map(([id, room]) => ({ id, ...room }));
+      .filter(([, room]) => !room.isFull && room.isRandom)
+      .map(([id, room]) => ({
+        id,
+        players: room.players.map((playerId) => this.userMap.get(playerId)), // Transforme les ID des joueurs en leurs détails
+        isRandom: room.isRandom,
+        isFull: room.isFull,
+        token: room.token,
+      }));
   }
 
   getRoomStatus() {
@@ -81,10 +112,16 @@ class RoomManager {
     if (!room || room.players.length >= 2 || !room.isRandom) {
       return false;
     }
-    room.players.push({ id: playerId, username }); // Stocker un objet avec l'ID et le nom d'utilisateur
+    room.players.push({ id: playerId, username });
+    console.log(
+      `[addPlayerToRoom] Ajout de l'utilisateur ${username} (ID: ${playerId}) à la room ${roomId}`,
+    );
     if (room.players.length === 2) {
       room.isFull = true;
     }
+    console.log(
+      `[addPlayerToRoom] Ajout du joueur ${username} (ID: ${playerId}) à la room ${roomId}`,
+    );
     return true;
   }
 
@@ -122,6 +159,28 @@ class RoomManager {
       clearTimeout(this.roomTimers[roomId]);
       delete this.roomTimers[roomId];
     }
+  }
+
+  updateGameState(playerId, gameState) {
+    // Trouvez la room à laquelle appartient le joueur
+    const roomId = this.findRoomIdByPlayerId(playerId);
+    if (!roomId) {
+      console.error("Room not found for player:", playerId);
+      return;
+    }
+
+    // Mettez à jour l'état du jeu pour cette room
+    const room = this.rooms[roomId];
+    room.gameState = gameState; // ou une logique de mise à jour plus complexe
+
+    console.log(`Game state updated for room ${roomId}`);
+  }
+
+  // Méthode pour trouver l'ID de la room par ID du joueur
+  findRoomIdByPlayerId(playerId) {
+    return Object.keys(this.rooms).find((roomId) =>
+      this.rooms[roomId].players.includes(playerId),
+    );
   }
 }
 

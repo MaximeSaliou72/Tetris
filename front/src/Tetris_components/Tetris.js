@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import { createStage, checkCollision } from "../gamehelper";
 import EmojiButton from "../component/EmojiButton";
+import { getTokenFromLocalStorage } from "../lib/common";
 
 // Styled Components
 import { StyledTetrisWrapper, StyledTetris } from "../styles/StyledTetris";
@@ -36,6 +37,12 @@ const Tetris = () => {
 
     socket.on("connect", () => {
       console.log("Connecté au serveur WebSocket");
+      const token = getTokenFromLocalStorage("jwtToken");
+      console.log(token);
+      // Envoyer le token JWT pour l'authentification
+      if (token) {
+        socket.emit("authenticate", { token });
+      }
     });
 
     socket.on("message", (message) => {
@@ -45,6 +52,8 @@ const Tetris = () => {
 
     socket.on("gameData", (data) => {
       console.log("GameData received:", data);
+      // Mettre à jour l'état du jeu sur le client en fonction des données reçues
+      updateGameState(data);
     });
 
     socket.on("emote", (data) => {
@@ -66,17 +75,34 @@ const Tetris = () => {
 
   useEffect(() => {
     if (socket) {
+      const token = getTokenFromLocalStorage("jwtToken");
       const gameData = {
         level: level,
         rows: rows,
         score: score,
-        username: "username",
+        token: token,
       };
 
+      console.log(
+        `Envoi de GameData pour le joueur avec le token ${token}`,
+        gameData,
+      );
       socket.emit("gameData", gameData);
-      console.log(gameData);
     }
   }, [socket, level, rows, score]);
+
+  const updateGameState = (data) => {
+    // Mettre à jour le score, les rangées, et le niveau en fonction des données reçues
+    if (data.score !== undefined) {
+      setScore(data.score);
+    }
+    if (data.rows !== undefined) {
+      setRows(data.rows);
+    }
+    if (data.level !== undefined) {
+      setLevel(data.level);
+    }
+  };
 
   const handleEmojiClick = (text) => {
     if (socket) {

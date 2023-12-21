@@ -3,22 +3,22 @@
 
 echo "Début du script pre-push"
 
-# Vérifie si des fichiers dans le répertoire 'back/' ont été modifiés
-FILES_CHANGED=$(git diff --name-only HEAD@{1} HEAD | grep '^back/')
+# # Vérifie si des fichiers dans le répertoire 'back/' ont été modifiés
+# FILES_CHANGED=$(git diff --name-only HEAD@{1} HEAD | grep '^back/')
 
-if [ -z "$FILES_CHANGED" ]; then
-    echo "Aucun fichier dans 'back/' modifié, tests ignorés."
-    exit 0
-else
-    echo "Exécution des tests car des fichiers 'back/' ont été modifiés."
-    cd back
-    # npm test
+# if [ -z "$FILES_CHANGED" ]; then
+#     echo "Aucun fichier dans 'back/' modifié, tests ignorés."
+#     exit 0
+# else
+#     echo "Exécution des tests car des fichiers 'back/' ont été modifiés."
+#     cd back
+#     npm test
 
-    # # Vérifie le statut de sortie des tests
-    # if [ $? -ne 0 ]; then
-    #     echo "Les tests ne sont pas entièrement valides, vous devez apporter des modifications et réessayer."
-    #     exit 1
-    # fi
-fi
+#     # Vérifie le statut de sortie des tests
+#     if [ $? -ne 0 ]; then
+#         echo "Les tests ne sont pas entièrement valides, vous devez apporter des modifications et réessayer."
+#         exit 1
+#     fi
+# fi
 
 echo "Fin du script pre-push"

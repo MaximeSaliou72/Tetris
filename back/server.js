@@ -4,7 +4,7 @@ import bodyParser from "koa-bodyparser";
 import koaJwt from "koa-jwt";
 import fs from "fs";
 import { koaCors, socketIoCors } from "./middleware.js";
-import authRoutes from "./auth.js";
+import authRoutes from "./routes/authRoutes.js";
 import generalRoutes from "./routes.js";
 import WebSocketManager from "./websocket/WebSocketManager.js"; // Assurez-vous que le chemin est correct
 
@@ -14,6 +14,7 @@ const config = JSON.parse(rawConfig);
 const app = new Koa();
 const server = http.createServer(app.callback());
 
+app.use(koaCors);
 app.use(bodyParser());
 
 // Middleware pour gérer les erreurs de manière globale
@@ -40,7 +41,6 @@ app.use(async (ctx, next) => {
   }
 });
 
-app.use(koaCors);
 app.use(
   koaJwt({ secret: config.jwt_secret }).unless({
     path: [/^\/public/, /^\/login/, /^\/signup/],
